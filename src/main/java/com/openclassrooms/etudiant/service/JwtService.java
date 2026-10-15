@@ -33,6 +33,27 @@ public class JwtService {
     }
 
     /**
+     * Lit le login (le "subject") inscrit dans le token.
+     * Lève une JwtException si le token est faux, falsifié ou expiré.
+     */
+    public String extractUsername(String token) {
+        return Jwts.parser()
+                .verifyWith(getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .getSubject();
+    }
+
+    /**
+     * Vérifie que le token appartient bien à cet utilisateur.
+     * (La signature et l'expiration sont déjà vérifiées par extractUsername.)
+     */
+    public boolean isTokenValid(String token, UserDetails userDetails) {
+        return extractUsername(token).equals(userDetails.getUsername());
+    }
+
+    /**
      * Transforme la clé secrète du .env en clé utilisable pour signer le token.
      */
     private SecretKey getSigningKey() {
