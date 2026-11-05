@@ -35,7 +35,8 @@ public class UserControllerTest {
 
 
     @Container
-    static MySQLContainer mySQLContainer = new MySQLContainer("mysql:latest");
+    // Version fixée : "mysql:latest" (MySQL 26.x) refuse une option de config ajoutée par Testcontainers.
+    static MySQLContainer mySQLContainer = new MySQLContainer("mysql:8.4");
 
     @Autowired
     private UserService userService;
