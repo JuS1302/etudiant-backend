@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JwtService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">etudiant-backend</a> &gt; <a href="index.source.html" class="el_package">com.openclassrooms.etudiant.service</a> &gt; <span class="el_source">JwtService.java</span></div><h1>JwtService.java</h1><pre class="source lang-java linenums">package com.openclassrooms.etudiant.service;
+
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
+
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+
+@Service
+<span class="fc" id="L14">public class JwtService {</span>
+
+    @Value(&quot;${JWT_SECRET}&quot;)
+    private String secretKey;
+
+    @Value(&quot;${JWT_EXPIRATION}&quot;)
+    private long jwtExpiration;
+
+    /**
+     * Génère un token JWT signé contenant le login de l'utilisateur.
+     */
+    public String generateToken(UserDetails userDetails) {
+<span class="fc" id="L26">        Date now = new Date();</span>
+<span class="fc" id="L27">        return Jwts.builder()</span>
+<span class="fc" id="L28">                .subject(userDetails.getUsername())</span>
+<span class="fc" id="L29">                .issuedAt(now)</span>
+<span class="fc" id="L30">                .expiration(new Date(now.getTime() + jwtExpiration))</span>
+<span class="fc" id="L31">                .signWith(getSigningKey())</span>
+<span class="fc" id="L32">                .compact();</span>
+    }
+
+    /**
+     * Lit le login (le &quot;subject&quot;) inscrit dans le token.
+     * Lève une JwtException si le token est faux, falsifié ou expiré.
+     */
+    public String extractUsername(String token) {
+<span class="fc" id="L40">        return Jwts.parser()</span>
+<span class="fc" id="L41">                .verifyWith(getSigningKey())</span>
+<span class="fc" id="L42">                .build()</span>
+<span class="fc" id="L43">                .parseSignedClaims(token)</span>
+<span class="fc" id="L44">                .getPayload()</span>
+<span class="fc" id="L45">                .getSubject();</span>
+    }
+
+    /**
+     * Vérifie que le token appartient bien à cet utilisateur.
+     * (La signature et l'expiration sont déjà vérifiées par extractUsername.)
+     */
+    public boolean isTokenValid(String token, UserDetails userDetails) {
+<span class="fc" id="L53">        return extractUsername(token).equals(userDetails.getUsername());</span>
+    }
+
+    /**
+     * Transforme la clé secrète du .env en clé utilisable pour signer le token.
+     */
+    private SecretKey getSigningKey() {
+<span class="fc" id="L60">        return Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

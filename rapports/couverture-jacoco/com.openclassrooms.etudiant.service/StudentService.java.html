@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StudentService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">etudiant-backend</a> &gt; <a href="index.source.html" class="el_package">com.openclassrooms.etudiant.service</a> &gt; <span class="el_source">StudentService.java</span></div><h1>StudentService.java</h1><pre class="source lang-java linenums">package com.openclassrooms.etudiant.service;
+
+import com.openclassrooms.etudiant.entities.Student;
+import com.openclassrooms.etudiant.exception.ResourceNotFoundException;
+import com.openclassrooms.etudiant.repository.StudentRepository;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
+
+import java.util.List;
+
+<span class="fc" id="L14">@Slf4j</span>
+@Service
+@Transactional
+@RequiredArgsConstructor
+public class StudentService {
+    private final StudentRepository studentRepository;
+
+    /**
+     * Enregistre un nouvel étudiant, si son email n'est pas déjà utilisé.
+     */
+    public Student create(Student student) {
+<span class="fc" id="L25">        Assert.notNull(student, &quot;Student must not be null&quot;);</span>
+<span class="fc" id="L26">        log.info(&quot;Creating new student&quot;);</span>
+<span class="pc bpc" id="L27" title="1 of 2 branches missed.">        if (studentRepository.existsByEmail(student.getEmail())) {</span>
+<span class="nc" id="L28">            throw new IllegalArgumentException(&quot;Student with email &quot; + student.getEmail() + &quot; already exists&quot;);</span>
+        }
+<span class="fc" id="L30">        return studentRepository.save(student);</span>
+    }
+
+    /**
+     * Renvoie la liste de tous les étudiants.
+     */
+    public List&lt;Student&gt; findAll() {
+<span class="fc" id="L37">        return studentRepository.findAll();</span>
+    }
+
+    /**
+     * Renvoie un étudiant par son id, ou lève une 404 s'il n'existe pas.
+     */
+    public Student findById(Long id) {
+<span class="fc" id="L44">        return studentRepository.findById(id)</span>
+<span class="pc" id="L45">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Student with id &quot; + id + &quot; not found&quot;));</span>
+    }
+
+    /**
+     * Modifie un étudiant existant avec les nouvelles valeurs reçues.
+     */
+    public Student update(Long id, Student newValues) {
+<span class="fc" id="L52">        Assert.notNull(newValues, &quot;Student must not be null&quot;);</span>
+<span class="fc" id="L53">        Student student = findById(id);</span>
+<span class="pc bpc" id="L54" title="1 of 2 branches missed.">        boolean emailChanged = !student.getEmail().equals(newValues.getEmail());</span>
+<span class="pc bpc" id="L55" title="3 of 4 branches missed.">        if (emailChanged &amp;&amp; studentRepository.existsByEmail(newValues.getEmail())) {</span>
+<span class="nc" id="L56">            throw new IllegalArgumentException(&quot;Student with email &quot; + newValues.getEmail() + &quot; already exists&quot;);</span>
+        }
+<span class="fc" id="L58">        student.setFirstName(newValues.getFirstName());</span>
+<span class="fc" id="L59">        student.setLastName(newValues.getLastName());</span>
+<span class="fc" id="L60">        student.setEmail(newValues.getEmail());</span>
+<span class="fc" id="L61">        return studentRepository.save(student);</span>
+    }
+
+    /**
+     * Supprime un étudiant, ou lève une 404 s'il n'existe pas.
+     */
+    public void delete(Long id) {
+<span class="fc" id="L68">        Student student = findById(id);</span>
+<span class="fc" id="L69">        studentRepository.delete(student);</span>
+<span class="fc" id="L70">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
