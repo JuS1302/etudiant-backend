@@ -88,13 +88,13 @@ public class StudentServiceTest {
         when(studentRepository.save(any(Student.class))).thenReturn(marie);
 
         // WHEN
-        Student created = studentService.create(marie);
+        Student studentCreated = studentService.create(marie);
 
         // THEN : save() a été appelé avec cet étudiant, et le service renvoie l'étudiant enregistré
         ArgumentCaptor<Student> studentCaptor = ArgumentCaptor.forClass(Student.class);
         verify(studentRepository).save(studentCaptor.capture());
         assertThat(studentCaptor.getValue()).isEqualTo(marie);
-        assertThat(created).isEqualTo(marie);
+        assertThat(studentCreated).isEqualTo(marie);
     }
 
     /**
