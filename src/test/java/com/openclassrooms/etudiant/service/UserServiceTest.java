@@ -92,9 +92,9 @@ public class UserServiceTest {
         when(jwtService.generateToken(user)).thenReturn("fake-token");
 
         // WHEN
-        String token = userService.login(LOGIN, PASSWORD);
+        String returnedToken = userService.login(LOGIN, PASSWORD);
 
         // THEN : le service renvoie le token fabriqué par le JwtService
-        assertThat(token).isEqualTo("fake-token");
+        assertThat(returnedToken).isEqualTo("fake-token");
     }
 }

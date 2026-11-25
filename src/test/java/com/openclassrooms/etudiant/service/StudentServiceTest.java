@@ -55,10 +55,10 @@ public class StudentServiceTest {
         when(studentRepository.findAll()).thenReturn(List.of(marie, pierre));
 
         // WHEN
-        List<Student> students = studentService.findAll();
+        List<Student> foundStudents = studentService.findAll();
 
         // THEN : on récupère bien ces 2 étudiants
-        assertThat(students).containsExactly(marie, pierre);
+        assertThat(foundStudents).containsExactly(marie, pierre);
     }
 
     /**
@@ -71,10 +71,10 @@ public class StudentServiceTest {
         when(studentRepository.findById(ID)).thenReturn(Optional.of(marie));
 
         // WHEN
-        Student found = studentService.findById(ID);
+        Student foundStudent = studentService.findById(ID);
 
         // THEN
-        assertThat(found).isEqualTo(marie);
+        assertThat(foundStudent).isEqualTo(marie);
     }
 
     /**
@@ -103,18 +103,18 @@ public class StudentServiceTest {
     @Test
     public void test_update_student() {
         // GIVEN : l'étudiant n°1 existe, et on veut changer son nom (même email)
-        Student existing = buildStudent(ID, FIRST_NAME, LAST_NAME, EMAIL);
-        Student newValues = buildStudent(null, FIRST_NAME, "Sklodowska-Curie", EMAIL);
-        when(studentRepository.findById(ID)).thenReturn(Optional.of(existing));
+        Student existingStudent = buildStudent(ID, FIRST_NAME, LAST_NAME, EMAIL);
+        Student studentWithNewName = buildStudent(null, FIRST_NAME, "Sklodowska-Curie", EMAIL);
+        when(studentRepository.findById(ID)).thenReturn(Optional.of(existingStudent));
         when(studentRepository.save(any(Student.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // WHEN
-        Student updated = studentService.update(ID, newValues);
+        Student updatedStudent = studentService.update(ID, studentWithNewName);
 
         // THEN : l'étudiant enregistré garde son id et a le nouveau nom
-        assertThat(updated.getId()).isEqualTo(ID);
-        assertThat(updated.getLastName()).isEqualTo("Sklodowska-Curie");
-        assertThat(updated.getEmail()).isEqualTo(EMAIL);
+        assertThat(updatedStudent.getId()).isEqualTo(ID);
+        assertThat(updatedStudent.getLastName()).isEqualTo("Sklodowska-Curie");
+        assertThat(updatedStudent.getEmail()).isEqualTo(EMAIL);
     }
 
     /**

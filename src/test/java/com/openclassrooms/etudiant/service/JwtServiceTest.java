@@ -38,10 +38,10 @@ public class JwtServiceTest {
     @Test
     public void test_generated_token_contains_login() {
         // WHEN
-        String token = jwtService.generateToken(user);
+        String generatedToken = jwtService.generateToken(user);
 
         // THEN : on relit le login inscrit dans le token
-        assertThat(jwtService.extractUsername(token)).isEqualTo(LOGIN);
+        assertThat(jwtService.extractUsername(generatedToken)).isEqualTo(LOGIN);
     }
 
     /**
@@ -50,9 +50,9 @@ public class JwtServiceTest {
     @Test
     public void test_token_is_valid_for_its_user() {
         // GIVEN
-        String token = jwtService.generateToken(user);
+        String generatedToken = jwtService.generateToken(user);
 
         // WHEN / THEN
-        assertThat(jwtService.isTokenValid(token, user)).isTrue();
+        assertThat(jwtService.isTokenValid(generatedToken, user)).isTrue();
     }
 }

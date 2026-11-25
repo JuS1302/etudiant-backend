@@ -110,11 +110,11 @@ public class StudentControllerTest {
      * Fabrique le JSON envoyé par le front pour créer ou modifier un étudiant.
      */
     private String buildRequestBody(String lastName) throws Exception {
-        StudentRequestDTO dto = new StudentRequestDTO();
-        dto.setFirstName(FIRST_NAME);
-        dto.setLastName(lastName);
-        dto.setEmail(EMAIL);
-        return objectMapper.writeValueAsString(dto);
+        StudentRequestDTO studentRequest = new StudentRequestDTO();
+        studentRequest.setFirstName(FIRST_NAME);
+        studentRequest.setLastName(lastName);
+        studentRequest.setEmail(EMAIL);
+        return objectMapper.writeValueAsString(studentRequest);
     }
 
     /**
@@ -160,14 +160,14 @@ public class StudentControllerTest {
     @Test
     public void findStudentByIdSuccessful() throws Exception {
         // GIVEN : un étudiant existe en base
-        Student student = saveStudent();
+        Student savedStudent = saveStudent();
 
         // WHEN / THEN : 200, avec les infos de cet étudiant
-        mockMvc.perform(MockMvcRequestBuilders.get(URL + "/" + student.getId())
+        mockMvc.perform(MockMvcRequestBuilders.get(URL + "/" + savedStudent.getId())
                         .header("Authorization", bearerToken))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(jsonPath("$.id").value(student.getId()))
+                .andExpect(jsonPath("$.id").value(savedStudent.getId()))
                 .andExpect(jsonPath("$.lastName").value(LAST_NAME));
     }
 
@@ -177,10 +177,10 @@ public class StudentControllerTest {
     @Test
     public void updateStudentSuccessful() throws Exception {
         // GIVEN : un étudiant existe en base
-        Student student = saveStudent();
+        Student savedStudent = saveStudent();
 
         // WHEN : on change son nom
-        mockMvc.perform(MockMvcRequestBuilders.put(URL + "/" + student.getId())
+        mockMvc.perform(MockMvcRequestBuilders.put(URL + "/" + savedStudent.getId())
                         .header("Authorization", bearerToken)
                         .content(buildRequestBody("Sklodowska-Curie"))
                         .contentType(MediaType.APPLICATION_JSON))
@@ -196,10 +196,10 @@ public class StudentControllerTest {
     @Test
     public void deleteStudentSuccessful() throws Exception {
         // GIVEN : un étudiant existe en base
-        Student student = saveStudent();
+        Student savedStudent = saveStudent();
 
         // WHEN / THEN : 204 (pas de contenu)
-        mockMvc.perform(MockMvcRequestBuilders.delete(URL + "/" + student.getId())
+        mockMvc.perform(MockMvcRequestBuilders.delete(URL + "/" + savedStudent.getId())
                         .header("Authorization", bearerToken))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().isNoContent());
