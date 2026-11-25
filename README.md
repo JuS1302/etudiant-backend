@@ -13,6 +13,15 @@ Backend qui gère les APIs des utilisateurs de la bibliothèque et les CRUD des 
     -> Docker
     -> Docker Compose
     -> Maven 3.9.3 (https://archive.apache.org/dist/maven/maven-3/3.9.3/binaries/) ou plus
+       (ou le wrapper fourni : ./mvnw, qui évite d'installer Maven)
+
+## Variables d'environnement (fichier `.env`)
+
+| Variable | Rôle |
+| --- | --- |
+| `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`, `DB_NAME` | connexion à la base MySQL |
+| `JWT_SECRET` | clé secrète qui signe les tokens JWT (au moins 32 caractères) |
+| `JWT_EXPIRATION` | durée de validité d'un token, en millisecondes |
 
 ## Démarrage du backend
 Pour démarrer le projet backend, il faut : 
@@ -106,26 +115,72 @@ La capture d'écran ci-dessous résume les étapes précédentes :
 ![2-docker-desktop-bdd](pictures/2-docker-desktop-bdd.png)
 
 
+## Fonctionnalités portées
+
+- API de création d'un utilisateur (agent de la bibliothèque)
+- API d'authentification d'un utilisateur, qui renvoie un token JWT
+- APIs CRUD des étudiants de la bibliothèque, protégées par le token JWT
+
+| Méthode | Route | Token | Réponse |
+| --- | --- | --- | --- |
+| `POST` | `/api/register` | non | 201 : agent créé |
+| `POST` | `/api/login` | non | 200 : `{ "token": "..." }` (401 si identifiants invalides) |
+| `GET` | `/api/students` | oui | 200 : liste des étudiants |
+| `GET` | `/api/students/{id}` | oui | 200 : un étudiant |
+| `POST` | `/api/students` | oui | 201 : étudiant créé |
+| `PUT` | `/api/students/{id}` | oui | 200 : étudiant modifié |
+| `DELETE` | `/api/students/{id}` | oui | 204 : étudiant supprimé |
+
+Les routes `/api/students` attendent le header `Authorization: Bearer <token>`, avec le token reçu à la connexion.
+
+## Écrans concernés (front-end)
+
+Le front Angular est dans le dépôt [etudiant-frontend](https://github.com/JuS1302/etudiant-frontend) :
+
+- Écran d'inscription (`/register`)
+- Écran de connexion (`/login`)
+- Liste des étudiants (`/students`)
+- Détail d'un étudiant (`/students/{id}`)
+- Ajout et modification d'un étudiant (`/students/new`, `/students/{id}/edit`)
+
 ## Exécution des tests
-Pour exécuter les tests Junit, il faut :
-- avoir démarré Docker-Desktop sur votre poste de travail local. Cette étape est nécessaire car les tests d'intégration auront besoin de Docker pour créer des bases de données temporaires de test.
+
+Pour exécuter les tests JUnit, il faut :
+- avoir démarré Docker-Desktop sur votre poste de travail local. Cette étape est nécessaire car les tests d'intégration ont besoin de Docker pour créer une base MySQL temporaire de test (Testcontainers).
+- arrêter le backend s'il tourne.
 - dans une console, se placer à la racine du projet et exécuter la commande Maven suivante :
 
 ```
-mvn clean test
+./mvnw clean test
 ```
 
-## Fonctionnalités portées
+Résultat attendu à la fin du log : `Tests run: 20, Failures: 0, Errors: 0` et `BUILD SUCCESS`.
 
-    - API de création d'un utilisateur (agent de la bibliothèque)
-    - API d'authentification d'un utilisateur (à faire)
-    - APIs CRUD des étudiants de la bibliothèque (à faire)
+| Fichier | Type | Tests | Ce qu'il teste |
+| --- | --- | --- | --- |
+| `StudentServiceTest` | unitaire (Mockito) | 5 | `findAll`, `findById`, `create`, `update`, `delete` |
+| `UserServiceTest` | unitaire (Mockito) | 4 | inscription et connexion |
+| `JwtServiceTest` | unitaire | 2 | fabrication et lecture du token |
+| `StudentControllerTest` | intégration (MockMvc + MySQL) | 5 | les 5 routes `/api/students`, avec le token |
+| `UserControllerTest` | intégration (MockMvc + MySQL) | 4 | `/api/register` et `/api/login` |
 
+## Couverture de code (JaCoCo)
 
-## Écrans ou blocs concernés
-    - Ecran xxx
-    - Ecran xxx
-    - Ecran xxx
+Le rapport est généré automatiquement à chaque `./mvnw clean test` :
 
+```
+open target/site/jacoco/index.html
+```
 
+Une copie du dernier rapport est rangée dans le dossier [`rapports/`](rapports/) :
+
+- `rapports/couverture-jacoco/index.html` : le rapport de couverture
+- `rapports/resultats-tests.txt` : le résultat des tests et le résumé de la couverture
+
+| Mesure | Couverture |
+| --- | --- |
+| Instructions | 82,3 % |
+| Lignes | 84,7 % |
+
+Le code généré par Lombok est exclu de la mesure grâce au fichier `lombok.config`.
 
