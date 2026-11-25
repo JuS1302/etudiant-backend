@@ -28,6 +28,8 @@ public class UserServiceTest {
     private UserRepository userRepository;
     @Mock
     private PasswordEncoder passwordEncoder;
+    @Mock
+    private JwtService jwtService;
     @InjectMocks
     private UserService userService;
 
@@ -74,5 +76,25 @@ public class UserServiceTest {
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userCaptor.capture());
         assertThat(userCaptor.getValue()).isEqualTo(user);
+    }
+
+    /**
+     * login() renvoie le token généré par le JwtService quand le login et le mot de passe sont bons.
+     */
+    @Test
+    public void test_login_returns_token() {
+        // GIVEN : un utilisateur existe, et le mot de passe tapé correspond au mot de passe chiffré
+        User user = new User();
+        user.setLogin(LOGIN);
+        user.setPassword("encodedPassword");
+        when(userRepository.findByLogin(LOGIN)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(PASSWORD, "encodedPassword")).thenReturn(true);
+        when(jwtService.generateToken(user)).thenReturn("fake-token");
+
+        // WHEN
+        String token = userService.login(LOGIN, PASSWORD);
+
+        // THEN : le service renvoie le token fabriqué par le JwtService
+        assertThat(token).isEqualTo("fake-token");
     }
 }
